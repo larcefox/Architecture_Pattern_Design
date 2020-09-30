@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+	<h1>Jinja 2 Template</h1>
+	<h3>Page title {{ title }}</h3>
+	<h4>Page body {{ body }}</h4>
+
+	<form action="/contacts" method="post">
+	  <label for="email">Email:</label>
+	  <input type="text" id="email" name="email"><br><br>
+
+	  <label for="title">Title:</label>
+	  <input type="text" id="title" name="title"><br><br>
+
+	  <label for="message">Message:</label>
+	  <input type="text" id="message" name="message"><br><br>
+
+	  <input type="submit" value="Submit">
+	</form>
+</body>
+</html>
