@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from core.templates import TemplateRender
 
 class Request:
     def __init__(self, data=None):
@@ -6,9 +7,10 @@ class Request:
 
 class Application(object):
 
-    def __init__(self, urls: dict, middlewares: list):
+    def __init__(self, urls: dict, middlewares: list, templates_dict: dict):
         self.urls = urls
         self.middlewares = middlewares
+        self.templates_dict = templates_dict
 
     def __call__(self, environ, start_response):
         """
@@ -17,19 +19,23 @@ class Application(object):
         """
 
         request = Request()
+        template_render = TemplateRender(self.templates_dict)
 
         for item in self.middlewares:
             item(request, environ)
 
         url = request.data['PATH_INFO']
-
-        if url in self.urls:
-            view = self.urls[url]
-            response = view(request)
-        else:
-            view = self.urls['/not_found/']
-            response = view(request)
-
+        view = ViewSelector()
+        view = view(self.urls, url)
+        response = view(request, template_render)
         start_response(response.code, [('Content-Type', 'text/html')])
         # возвращаем тело ответа в виде списка из bite
         return response.text
+
+
+class ViewSelector():
+        def __call__(self, urls, url):
+            if url in urls:
+                return urls[url]
+            else:
+                return urls['/not_found/']
