@@ -15,10 +15,14 @@ def slash_middleware(request, environ):
 
 def data_middleware(request, environ):
     if environ['REQUEST_METHOD'] == 'GET':
+        # filtr blanc GET requests
         if environ['QUERY_STRING']:
             query_string = environ['QUERY_STRING']
             request_params = parse_input_data(query_string)
-            request.data['GET_DATA'] = request_params
+            # making list of dicts for jinja2
+            request.data['GET_DATA'] = []
+            for key, value in request_params.items():
+                request.data['GET_DATA'].append({key: value})
     elif environ['REQUEST_METHOD'] == 'POST':
         query_string = get_wsgi_input_data(environ).decode(encoding='utf-8')
         request_params = parse_input_data(query_string)
@@ -65,8 +69,10 @@ middlewares = [
 # dict of templates with paths
 # if page title equal dict key template will be applied
 templates_dict = {
-    'INDEX': path_maker('templates', 'index.html'),
-    'CONTACTS': path_maker('templates', 'contacts.html'),
+    'INDEX': 'index.html',
+    'CONTACTS': 'contacts.html',
+    'NOT FOUND': '404.html',
+    'ABOUT': 'about.html',
 }
 
 application = Application(urls, middlewares, templates_dict)
