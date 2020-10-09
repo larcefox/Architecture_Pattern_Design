@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from core.engine import Application
 import views
+import os
 
 
 def client_middleware(request, environ):
@@ -14,17 +15,20 @@ def slash_middleware(request, environ):
 
 def data_middleware(request, environ):
     if environ['REQUEST_METHOD'] == 'GET':
-        print('GET')
-        query_string = environ['QUERY_STRING']
-        request_params = parse_input_data(query_string)
-        print(request_params)
+        # filtr blanc GET requests
+        if environ['QUERY_STRING']:
+            query_string = environ['QUERY_STRING']
+            request_params = parse_input_data(query_string)
+            # making list of dicts for jinja2
+            request.data['GET_DATA'] = []
+            for key, value in request_params.items():
+                request.data['GET_DATA'].append({key: value})
     elif environ['REQUEST_METHOD'] == 'POST':
-        print('POST')
         query_string = get_wsgi_input_data(environ).decode(encoding='utf-8')
         request_params = parse_input_data(query_string)
-        print(request_params)
+        request.data['POST_DATA'] = request_params
     else:
-        print('REQUEST METHOD NOT SUPPORT')
+        print('REQUEST METHOD NOT SUPPORT :', environ['REQUEST_METHOD'])
 
 def parse_input_data(data: str):
     result = {}
@@ -46,6 +50,9 @@ def get_wsgi_input_data(env) -> bytes:
     data = env['wsgi.input'].read(content_length) if content_length > 0 else b''
     return data
 
+def path_maker(*args):
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)), *args)
+
 urls = {
     '/': views.main_view,
     '/about/': views.about_view,
@@ -59,4 +66,13 @@ middlewares = [
     data_middleware,
 ]
 
-application = Application(urls, middlewares)
+# dict of templates with paths
+# if page title equal dict key template will be applied
+templates_dict = {
+    'INDEX': 'index.html',
+    'CONTACTS': 'contacts.html',
+    'NOT FOUND': '404.html',
+    'ABOUT': 'about.html',
+}
+
+application = Application(urls, middlewares, templates_dict)

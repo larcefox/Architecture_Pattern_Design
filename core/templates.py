@@ -1,14 +1,42 @@
 # -*- coding: utf-8 -*-
-import os
 from jinja2 import Template
+from jinja2 import FileSystemLoader
+from jinja2.environment import Environment
 
 
-def rendr(title, body):
-    if title == 'CONTACTS':
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'templates','contacts.html'), mode='r', encoding='utf8') as f:
-            template = Template(f.read())
-            return [template.render(title=title, body=body).encode(encoding='utf8')]
-    else:
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'templates','index.html'), mode='r', encoding='utf8') as f:
-            template = Template(f.read())
-            return [template.render(title=title, body=body).encode(encoding='utf8')]
+class TemplateRender():
+    def __init__(self, templates_dict):
+        self.templates_dict = templates_dict
+
+    def __call__(self, title, body):
+        template = TemplateSelector(self.templates_dict, title)
+        template = template()
+        template = self.render(template, title, body)
+        template = self.encode_text(template)
+        template = self.wsgi_prepair(template)
+        return template
+
+    def encode_text(self, template):
+        return template.encode(encoding='utf8')
+
+    def render(self, template, title, body):
+        return template.render(title=title, body=body)
+
+    def wsgi_prepair(self, template):
+        return [template]
+
+
+class TemplateSelector():
+        def __init__(self, templates_dict, title):
+            self.templates_dict = templates_dict
+            self.title = title
+            self.env = Environment()
+            self.env.loader = FileSystemLoader('templates')
+
+        def __call__(self):
+            if self.title in self.templates_dict:
+                template = self.env.get_template(self.templates_dict[self.title])
+                return template
+            else:
+                template = self.env.get_template(self.templates_dict['INDEX'])
+                return template
