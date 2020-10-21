@@ -7,10 +7,11 @@ class Request:
 
 class Application(object):
 
-    def __init__(self, urls: dict, middlewares: list, templates_dict: dict):
+    def __init__(self, urls: dict, middlewares: list, templates_dict: dict, models_list: list):
         self.urls = urls
         self.middlewares = middlewares
         self.templates_dict = templates_dict
+        self.models_list = models_list
 
     def __call__(self, environ, start_response):
         """
@@ -27,7 +28,7 @@ class Application(object):
         url = request.data['PATH_INFO']
         view = ViewSelector()
         view = view(self.urls, url)
-        response = view(request, template_render)
+        response = view(request, template_render, self.models_list)
         start_response(response.code, [('Content-Type', 'text/html')])
         # возвращаем тело ответа в виде списка из bite
         return response.text
