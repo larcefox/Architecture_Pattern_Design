@@ -7,7 +7,7 @@ class Request:
 
 class Application(object):
 
-    def __init__(self, urls: dict, middlewares: list, templates_dict: dict, models_list: list):
+    def __init__(self, urls: dict, middlewares: list, templates_dict: dict, models_list: dict):
         self.urls = urls
         self.middlewares = middlewares
         self.templates_dict = templates_dict

@@ -112,3 +112,16 @@ class Category(object):
         if self.category:
             result += self.category.course_count()
         return result
+
+class ProxyCategory(Category):
+    def __init__(self):
+        self.pcategory = Category
+        self.categorys = {
+            'standart_category': self.pcategory('standart_category', None),
+        }
+    def select_category(self, name: str, category=None) -> object:
+        if name in self.categorys:
+            return self.categorys[name]
+        else:
+            self.categorys[name] = self.pcategory(name, None)
+            return self.categorys[name]

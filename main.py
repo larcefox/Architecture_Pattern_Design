@@ -92,12 +92,8 @@ user_types = {
     'standart_user': models.StandartUser,
 }
 
-# Create first category
-standart_category = models.Category('standart_category', None)
-# Course categorys dict
-categorys = {
-    'standart_category': standart_category,
-}
+# Create logger proxy object for category
+proxy_category = models.ProxyCategory()
 
 @debug
 def select_category(name: str, category=None) -> object:
@@ -110,11 +106,11 @@ def select_category(name: str, category=None) -> object:
 
 
 
-models_list = [
-    course_types,
-    user_types,
-    select_category,
-    categorys,
-]
+models_list = {
+    'course_types': course_types,
+    'user_types': user_types,
+    'select_category': proxy_category.select_category,
+    'categorys': proxy_category.categorys,
+}
 
 application = Application(urls, middlewares, templates_dict, models_list)

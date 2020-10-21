@@ -70,18 +70,18 @@ def admin_view(request, template_render, models_list) -> Response:
 
     post_data = request.data.get('POST_DATA', None)
     get_data = request.data.get('GET_DATA', None)
-    body['course_list'] = models_list[0]
-    body['course_category'] = models_list[3]
+    body['course_list'] = models_list['course_types']
+    body['course_category'] = models_list['categorys']
     if post_data:
 
         if 'course_category_add' in post_data:
-            models_list[2](post_data['course_category_add'])
+            models_list['select_category'](post_data['course_category_add'])
 
         elif 'course_type' in post_data:
             # Replace category name by object
-            post_data['course_category'] = models_list[2](post_data['course_category'])
+            post_data['course_category'] = models_list['select_category'](post_data['course_category'])
             # Create course
-            course = Course.create(models_list[0], **post_data)
+            course = Course.create(models_list['course_types'], **post_data)
 
             data_storage.save_course(course)
             body['courses'] = data_storage.get_courses()
