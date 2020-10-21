@@ -1,0 +1,79 @@
+{% extends "base1.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block main %}
+	<h1>Jinja 2 Template</h1>
+	{% set active_page = 'contacts' %}
+	{% include 'include/menu.html' %}
+	<h3>Page title {{ title }}</h3>
+	<h4>Page body {{ body.client }}</h4>
+
+	<h2>Category Add:</h2>
+	<form action="/admin" method="post">
+		<label for="course_category_add">Category add</label>
+		<input type="text" id="course_category_add" name="course_category_add">
+		<input type="submit" value="Submit">
+	</form>
+
+	<h2>Course Add:</h2>
+	<form action="/admin" method="post">
+
+	  <label for="course_type">Course type:</label>
+		<select name="course_type">
+			{% for course in body.course_list %}
+					<option label="{{ course }}" value="{{ course }}">{{ course }}</option>
+			{% endfor %}
+		</select>
+
+	<br><br>
+	  <label for="course_category">Course category:</label>
+		<select name="course_category">
+			{% for category in body.course_category %}
+					<option label="{{ category }}" value="{{ category }}">{{ category }}</option>
+			{% endfor %}
+		</select>
+	  <br><br>
+	  <label for="course_specialization">Course specialization:</label>
+	  <input type="text" id="course_specialization" name="course_specialization"><br><br>
+
+	  <label for="course_duration">Course duration:</label>
+	  <input type="text" id="course_duration" name="course_duration"><br><br>
+
+	  <label for="course_level">Course level:</label>
+	  <input type="text" id="course_level" name="course_level"><br><br>
+
+	  <input type="submit" value="Submit">
+	</form>
+
+	<h3>Courses:</h3>
+	<form action="/admin" method="post">
+		<ul>
+			{% if body.courses %}
+				{% for item in body.courses %}
+					<li>
+						Course type: {{ item.course_type }},
+						Course category: {{ item.course_category.name }},
+						Course Specialization: {{ item.course_specialization|replace('+', ' ') }},
+						Course duration: {{ item.course_duration }},
+						Course level: {{ item.course_level }}
+						<input type="hidden" id="course_type" name="course_type" value="{{ item.course_type }}">
+						<input type="hidden" id="course_category" name="course_category" value="{{ item.course_category.name }}">
+						<input type="hidden" id="course_specialization" name="course_specialization" value="{{ item.course_specialization|replace('+', ' ') }}">
+						<input type="hidden" id="course_duration" name="course_duration" value="{{ item.course_duration }}">
+						<input type="hidden" id="course_level" name="course_level" value="{{ item.course_level }}">
+						<input type="submit" value="Copy course">
+					</li>
+				{% endfor %}
+			{% endif %}
+		</ul>
+	</form>
+
+	<br><br>
+	<h3>Categorys:</h3>
+		{% for name, obj in body.course_category.items() %}
+		<br>Category: {{ name }} Courses ({{ obj.course_count() }}):
+				{% for course in obj.courses %}
+					 {{ course.course_type -}}
+				{% endfor %}
+		{% endfor %}
+{% endblock %}
+

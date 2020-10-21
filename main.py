@@ -2,7 +2,10 @@
 from core.engine import Application
 import views
 import os
+import models
+from logging_mod import Logger, debug
 
+logger = Logger('main')
 
 def client_middleware(request, environ):
     request.data['client'] = environ['HTTP_USER_AGENT']
@@ -13,16 +16,15 @@ def slash_middleware(request, environ):
         url = url + '/'
     request.data['PATH_INFO'] = url
 
+@debug
 def data_middleware(request, environ):
     if environ['REQUEST_METHOD'] == 'GET':
         # filtr blanc GET requests
         if environ['QUERY_STRING']:
             query_string = environ['QUERY_STRING']
             request_params = parse_input_data(query_string)
-            # making list of dicts for jinja2
-            request.data['GET_DATA'] = []
-            for key, value in request_params.items():
-                request.data['GET_DATA'].append({key: value})
+            request.data['GET_DATA'] = request_params
+
     elif environ['REQUEST_METHOD'] == 'POST':
         query_string = get_wsgi_input_data(environ).decode(encoding='utf-8')
         request_params = parse_input_data(query_string)
@@ -58,6 +60,7 @@ urls = {
     '/about/': views.about_view,
     '/contacts/': views.contacts_view,
     '/not_found/': views.not_found_view,
+    '/admin/': views.admin_view,
 }
 
 middlewares = [
@@ -73,6 +76,45 @@ templates_dict = {
     'CONTACTS': 'contacts.html',
     'NOT FOUND': '404.html',
     'ABOUT': 'about.html',
+    'ADMIN': 'admin.html',
 }
 
-application = Application(urls, middlewares, templates_dict)
+# Course types dict
+course_types = {
+    'generic': models.Generic,
+    'java': models.Java,
+    'javascript': models.JavaScript,
+    'python': models.Python,
+}
+
+# User types dict
+user_types = {
+    'standart_user': models.StandartUser,
+}
+
+# Create first category
+standart_category = models.Category('standart_category', None)
+# Course categorys dict
+categorys = {
+    'standart_category': standart_category,
+}
+
+@debug
+def select_category(name: str, category=None) -> object:
+    if name in categorys:
+        return categorys[name]
+    else:
+        categorys[name] = models.Category(name, None)
+        return categorys[name]
+
+
+
+
+models_list = [
+    course_types,
+    user_types,
+    select_category,
+    categorys,
+]
+
+application = Application(urls, middlewares, templates_dict, models_list)
