@@ -7,10 +7,9 @@ class Request:
 
 class Application(object):
 
-    def __init__(self, urls: dict, middlewares: list, templates_dict: dict, models_list: list):
+    def __init__(self, urls: dict, middlewares: list, models_list: dict):
         self.urls = urls
         self.middlewares = middlewares
-        self.templates_dict = templates_dict
         self.models_list = models_list
 
     def __call__(self, environ, start_response):
@@ -20,7 +19,7 @@ class Application(object):
         """
 
         request = Request()
-        template_render = TemplateRender(self.templates_dict)
+        template_render = TemplateRender()
 
         for item in self.middlewares:
             item(request, environ)
