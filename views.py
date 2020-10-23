@@ -3,6 +3,7 @@ import os
 import configparser
 from domains.course import Course
 from domains.user import User
+from models import UrlDecoratorStage1
 
 # Загрузка файла конфигурации сервера
 config = configparser.ConfigParser()
@@ -40,33 +41,33 @@ data_storage = Data_Storage()
 def main_view(request, template_render, models) -> Response:
     body['client'] = request.data.get('client', None)
     # if page title equal dict key template will be applied
-    title = 'INDEX'
+    title = 'index'
     body['data'] = request.data.get('GET_DATA', None)
     return Response(ANSWER_CODES['200'], template_render(title, body))
 
 def about_view(request, template_render, models) -> Response:
     body['client'] = request.data.get('client', None)
     # if page title equal dict key template will be applied
-    title = 'ABOUT'
+    title = 'about'
     return Response(ANSWER_CODES['200'], template_render(title, body))
 
 def contacts_view(request, template_render, models) -> Response:
     body['client'] = request.data.get('client', None)
     # if page title equal dict key template will be applied
-    title = 'CONTACTS'
+    title = 'contacts'
     print(request.data.get('POST_DATA', None))
     return Response(ANSWER_CODES['200'], template_render(title, body))
 
 def not_found_view(request, template_render, models) -> Response:
     body['client'] = request.data.get('client', None)
     # if page title equal dict key template will be applied
-    title = 'NOT FOUND'
+    title = '404'
     return Response(ANSWER_CODES['404'], template_render(title, body))
 
 def admin_view(request, template_render, models_list) -> Response:
     body['client'] = request.data.get('client', None)
     # if page title equal dict key template will be applied
-    title = 'ADMIN'
+    title = 'admin'
 
     post_data = request.data.get('POST_DATA', None)
     get_data = request.data.get('GET_DATA', None)
@@ -86,4 +87,11 @@ def admin_view(request, template_render, models_list) -> Response:
             data_storage.save_course(course)
             body['courses'] = data_storage.get_courses()
 
+    return Response(ANSWER_CODES['200'], template_render(title, body))
+
+@UrlDecoratorStage1('/bingo/')
+def bingo_view(request, template_render, models) -> Response:
+    body['client'] = request.data.get('client', None)
+    # if page title equal dict key template will be applied
+    title = 'ABOUT'
     return Response(ANSWER_CODES['200'], template_render(title, body))

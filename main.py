@@ -3,18 +3,38 @@ from core.engine import Application
 import views
 import os
 import models
+from pprint import pprint
 from logging_mod import Logger, debug
+from reusepatterns.run_once import RunOnce
 
 logger = Logger('main')
 
 def client_middleware(request, environ):
     request.data['client'] = environ['HTTP_USER_AGENT']
 
+@RunOnce
+def collect_urls_middleware(request, environ):
+    print('--------------------------------------------------------------------------------------')
+    for module in dir(views):
+        if 'view' in module:
+            try:
+                exec(f'views.{module}()')
+            except Exception as e:
+                pass
+    print('--------------------------------------------------------------------------------------')
+
 def slash_middleware(request, environ):
     url = environ['PATH_INFO']
     if url[-1] != '/':
         url = url + '/'
     request.data['PATH_INFO'] = url
+
+def staic_path(request, environ):
+    url = environ['PATH_INFO']
+    for itm in urls:
+        if itm in url and 'css' in url and url != '/':
+            url.replace(itm, "/")
+
 
 @debug
 def data_middleware(request, environ):
@@ -62,22 +82,15 @@ urls = {
     '/not_found/': views.not_found_view,
     '/admin/': views.admin_view,
 }
+setattr(models.UrlDecoratorStage2, "urls", urls)
 
 middlewares = [
     client_middleware,
     slash_middleware,
     data_middleware,
+    staic_path,
+    collect_urls_middleware,
 ]
-
-# dict of templates with paths
-# if page title equal dict key template will be applied
-templates_dict = {
-    'INDEX': 'index.html',
-    'CONTACTS': 'contacts.html',
-    'NOT FOUND': '404.html',
-    'ABOUT': 'about.html',
-    'ADMIN': 'admin.html',
-}
 
 # Course types dict
 course_types = {
@@ -95,17 +108,6 @@ user_types = {
 # Create logger proxy object for category
 proxy_category = models.ProxyCategory()
 
-@debug
-def select_category(name: str, category=None) -> object:
-    if name in categorys:
-        return categorys[name]
-    else:
-        categorys[name] = models.Category(name, None)
-        return categorys[name]
-
-
-
-
 models_list = {
     'course_types': course_types,
     'user_types': user_types,
@@ -113,4 +115,4 @@ models_list = {
     'categorys': proxy_category.categorys,
 }
 
-application = Application(urls, middlewares, templates_dict, models_list)
+application = Application(models.UrlDecoratorStage2.urls, middlewares, models_list)

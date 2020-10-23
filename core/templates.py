@@ -5,11 +5,8 @@ from jinja2.environment import Environment
 
 
 class TemplateRender():
-    def __init__(self, templates_dict):
-        self.templates_dict = templates_dict
-
     def __call__(self, title, body):
-        template = TemplateSelector(self.templates_dict, title)
+        template = TemplateSelector(title)
         template = template()
         template = self.render(template, title, body)
         template = self.encode_text(template)
@@ -25,18 +22,18 @@ class TemplateRender():
     def wsgi_prepair(self, template):
         return [template]
 
-
 class TemplateSelector():
-        def __init__(self, templates_dict, title):
-            self.templates_dict = templates_dict
+        def __init__(self, title):
             self.title = title
             self.env = Environment()
             self.env.loader = FileSystemLoader('templates')
+            self.templates = self.env.loader.list_templates()
+            # print(self.templates)
 
         def __call__(self):
-            if self.title in self.templates_dict:
-                template = self.env.get_template(self.templates_dict[self.title])
-                return template
-            else:
-                template = self.env.get_template(self.templates_dict['INDEX'])
-                return template
+            for item in self.templates:
+                if self.title in item.split('.')[0]:
+                    template = self.env.get_template(item)
+                    return template
+            template = self.env.get_template('index.html')
+            return template

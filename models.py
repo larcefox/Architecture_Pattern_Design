@@ -125,3 +125,33 @@ class ProxyCategory(Category):
         else:
             self.categorys[name] = self.pcategory(name, None)
             return self.categorys[name]
+
+'''
+--------------------------FLASK_URL_DECORATOR--------------------------
+'''
+
+class UrlDecoratorStage2(object):
+    def __init__(self, func, url):
+        self.func = func
+        self.url = url
+    def __call__(self, *args, **kw):
+        # code to run prior to function call
+        try:
+            result = self.func(*args, **kw)
+            # code to run after function call
+            return result
+        except Exception as e:
+            self.urls[self.url] = self.func
+            print('Url added: ', self.url)
+    def get_urls(self):
+        return self.urls
+
+class UrlDecoratorStage1(object):
+
+    def __init__(self, url):
+        self.url = url
+        self.mode = "decorating"
+
+    def __call__(self, func):
+        return UrlDecoratorStage2(func, self.url)
+
