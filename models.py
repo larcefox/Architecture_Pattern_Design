@@ -8,12 +8,14 @@ from domains.users_courses import UsersCourses
 
 class Java(Course):
     def __init__(self, course_specialization, course_duration, course_level, course_category):
+        self.id = Course.auto_id
+        Course.auto_id += 1
         self.course_type = 'java'
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
         self.course_category = course_category
-        self.course_category.courses.append(self)
+        self.course_category_add()
     def course_duration(self):
         return self.course_duration
     def course_level(self):
@@ -22,15 +24,19 @@ class Java(Course):
         return self.course_specialization
     def course_type(self):
         return self.course_type
+    def course_category_add(self):
+        self.course_category.courses.append(self)
 
 class JavaScript(Course):
     def __init__(self, course_specialization, course_duration, course_level, course_category):
+        self.id = Course.auto_id
+        Course.auto_id += 1
         self.course_type = 'javascript'
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
         self.course_category = course_category
-        self.course_category.courses.append(self)
+        self.course_category_add()
     def course_duration(self):
         return self.course_duration
     def course_level(self):
@@ -39,15 +45,19 @@ class JavaScript(Course):
         return self.course_specialization
     def course_type(self):
         return self.course_type
+    def course_category_add(self):
+        self.course_category.courses.append(self)
 
 class Python(Course):
     def __init__(self, course_specialization, course_duration, course_level, course_category):
+        self.id = Course.auto_id
+        Course.auto_id += 1
         self.course_type = 'python'
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
         self.course_category = course_category
-        self.course_category.courses.append(self)
+        self.course_category_add()
     def course_duration(self):
         return self.course_duration
     def course_level(self):
@@ -56,23 +66,29 @@ class Python(Course):
         return self.course_specialization
     def course_type(self):
         return self.course_type
+    def course_category_add(self):
+        self.course_category.courses.append(self)
 
 class Generic(Course):
     def __init__(self, course_specialization, course_duration, course_level, course_category):
+        self.id = Course.auto_id
+        Course.auto_id += 1
         self.course_type = 'generic'
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
         self.course_category = course_category
-        self.course_category.courses.append(self)
+        self.course_category_add()
     def course_duration(self):
         return self.course_duration
     def course_level(self):
         return self.course_level
-    def course_specialization(self):
+    def course_specialization(self, course_specialization):
         return self.course_specialization
     def course_type(self):
         return self.course_type
+    def course_category_add(self):
+        self.course_category.courses.append(self)
 
 '''
 --------------------------USERS--------------------------

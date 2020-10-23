@@ -55,11 +55,8 @@
 						Course Specialization: {{ item.course_specialization|replace('+', ' ') }},
 						Course duration: {{ item.course_duration }},
 						Course level: {{ item.course_level }}
-						<input type="hidden" id="course_type" name="course_type" value="{{ item.course_type }}">
-						<input type="hidden" id="course_category" name="course_category" value="{{ item.course_category.name }}">
-						<input type="hidden" id="course_specialization" name="course_specialization" value="{{ item.course_specialization|replace('+', ' ') }}">
-						<input type="hidden" id="course_duration" name="course_duration" value="{{ item.course_duration }}">
-						<input type="hidden" id="course_level" name="course_level" value="{{ item.course_level }}">
+						Course id: {{ item.id }}
+						<input type="hidden" id="course_clone_id" name="course_clone_id" value="{{ item.id }}">
 						<input type="submit" value="Copy course">
 					</li>
 				{% endfor %}

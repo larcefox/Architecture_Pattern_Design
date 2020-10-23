@@ -34,6 +34,11 @@ class Data_Storage:
     def get_users(self):
         return self.users or []
 
+    def get_course_by_id(self, id):
+        for course in self.get_courses():
+            if course.id == id:
+                return course
+
 
 data_storage = Data_Storage()
 
@@ -83,9 +88,16 @@ def admin_view(request, template_render, models_list) -> Response:
             post_data['course_category'] = models_list['select_category'](post_data['course_category'])
             # Create course
             course = Course.create(models_list['course_types'], **post_data)
-
             data_storage.save_course(course)
-            body['courses'] = data_storage.get_courses()
+
+        elif 'course_clone_id' in post_data:
+
+            original_course_id = int(post_data['course_clone_id'])
+            original_course = data_storage.get_course_by_id(original_course_id)
+            clone_course = original_course.clone(original_course)
+            data_storage.save_course(clone_course)
+
+        body['courses'] = data_storage.get_courses()
 
     return Response(ANSWER_CODES['200'], template_render(title, body))
 
