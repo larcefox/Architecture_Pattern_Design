@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 from core.templates import TemplateRender
+from reusepatterns.singletones import Singleton
 
 class Request:
     def __init__(self, data=None):
         self.data = data or {}
 
-class Application(object):
+class Application():
+    _instance = None
 
     def __init__(self, urls: dict, middlewares: list, models_list: dict):
         self.urls = urls
         self.middlewares = middlewares
         self.models_list = models_list
+        __class__._instance = self
 
     def __call__(self, environ, start_response):
         """
@@ -32,6 +35,11 @@ class Application(object):
         # возвращаем тело ответа в виде списка из bite
         return response.text
 
+    def add_route(self, url):
+        # паттерн декоратор
+        def inner(view):
+            self.urls[url] = view
+        return inner
 
 class ViewSelector():
         def __call__(self, urls, url):

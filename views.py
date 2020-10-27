@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+
 import os
 import configparser
 from domains.course import Course
 from domains.user import User
 from models import UrlDecoratorStage1
+from core.engine import Application
 
 # Загрузка файла конфигурации сервера
 config = configparser.ConfigParser()
@@ -81,7 +83,7 @@ def admin_view(request, template_render, models_list) -> Response:
     if post_data:
 
         if 'course_category_add' in post_data:
-            models_list['select_category'](post_data['course_category_add'])
+            models_list['select_category'](name=post_data['course_category_add'])
 
         elif 'course_type' in post_data:
             # Replace category name by object
@@ -101,7 +103,7 @@ def admin_view(request, template_render, models_list) -> Response:
 
     return Response(ANSWER_CODES['200'], template_render(title, body))
 
-@UrlDecoratorStage1('/bingo/')
+#@application.add_route('/bingo/')
 def bingo_view(request, template_render, models) -> Response:
     body['client'] = request.data.get('client', None)
     # if page title equal dict key template will be applied

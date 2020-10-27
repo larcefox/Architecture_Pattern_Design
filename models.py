@@ -1,6 +1,5 @@
 from domains.course import Course
 from domains.user import User
-from domains.users_courses import UsersCourses
 
 '''
 --------------------------COURCES--------------------------
@@ -129,18 +128,16 @@ class Category(object):
             result += self.category.course_count()
         return result
 
-class ProxyCategory(Category):
-    def __init__(self):
-        self.pcategory = Category
-        self.categorys = {
-            'standart_category': self.pcategory('standart_category', None),
+class CategoryLogger():
+    categorys = {
+            'standart_category': Category('standart_category', None),
         }
-    def select_category(self, name: str, category=None) -> object:
-        if name in self.categorys:
-            return self.categorys[name]
+    def __call__(self, name: str, category=None) -> object:
+        if name in __class__.categorys:
+            return __class__.categorys[name]
         else:
-            self.categorys[name] = self.pcategory(name, None)
-            return self.categorys[name]
+            __class__.categorys[name] = Category(name, None)
+            return __class__.categorys[name]
 
 '''
 --------------------------FLASK_URL_DECORATOR--------------------------

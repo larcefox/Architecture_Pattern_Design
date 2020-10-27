@@ -12,16 +12,6 @@ logger = Logger('main')
 def client_middleware(request, environ):
     request.data['client'] = environ['HTTP_USER_AGENT']
 
-@RunOnce
-def collect_urls_middleware(request, environ):
-    print('--------------------------------------------------------------------------------------')
-    for module in dir(views):
-        if 'view' in module:
-            try:
-                exec(f'views.{module}()')
-            except Exception as e:
-                pass
-    print('--------------------------------------------------------------------------------------')
 
 def slash_middleware(request, environ):
     url = environ['PATH_INFO']
@@ -105,14 +95,14 @@ user_types = {
     'standart_user': models.StandartUser,
 }
 
-# Create logger proxy object for category
-proxy_category = models.ProxyCategory()
+# Create logger object for category
+category = models.CategoryLogger()
 
 models_list = {
     'course_types': course_types,
     'user_types': user_types,
-    'select_category': proxy_category.select_category,
-    'categorys': proxy_category.categorys,
+    'select_category': category,
+    'categorys': category.__class__.categorys,
 }
 
-application = Application(models.UrlDecoratorStage2.urls, middlewares, models_list)
+application = Application(urls, middlewares, models_list)
