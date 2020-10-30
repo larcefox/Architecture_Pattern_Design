@@ -16,7 +16,7 @@ class SingletonByName(type):
             cls.__instance[name] = super().__call__(*args, **kwargs)
             return cls.__instance[name]
 
-class Singleton(type):
+class SingletonWithArgs(type):
     def __init__(cls, name, bases, attrs, **kwargs):
         super().__init__(name, bases, attrs)
         cls.__instance = None

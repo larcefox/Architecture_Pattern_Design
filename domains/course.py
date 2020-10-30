@@ -19,6 +19,14 @@ class Course(abc.ABC):
     def course_specialization(self):
         pass
 
+    @abc.abstractmethod
+    def course_type(self):
+        pass
+
+    @abc.abstractmethod
+    def course_category_add(self):
+        pass
+
     @staticmethod
     def create(course_types, course_type, course_specialization, course_duration, course_level, course_category, **kwargs):
         course_type = course_type if len(course_type) else 'generic'

@@ -71,15 +71,14 @@ urls = {
     '/contacts/': views.contacts_view,
     '/not_found/': views.not_found_view,
     '/admin/': views.admin_view,
+    '/user_add/': views.user_add_view,
 }
-setattr(models.UrlDecoratorStage2, "urls", urls)
 
 middlewares = [
     client_middleware,
     slash_middleware,
     data_middleware,
     staic_path,
-    collect_urls_middleware,
 ]
 
 # Course types dict
@@ -97,12 +96,16 @@ user_types = {
 
 # Create logger object for category
 category = models.CategoryLogger()
+# Create logger object for user category
+user_category = models.UserCategoryLogger()
 
 models_list = {
     'course_types': course_types,
     'user_types': user_types,
     'select_category': category,
     'categorys': category.__class__.categorys,
+    'select_user_category': user_category,
+    'user_categorys': user_category.__class__.categorys,
 }
 
 application = Application(urls, middlewares, models_list)

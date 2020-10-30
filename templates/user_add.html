@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block main %}
+	<h1>Jinja 2 Template</h1>
+	{% set active_page = 'contacts' %}
+	{% include 'include/menu.html' %}
+	<h3>Page title {{ title }}</h3>
+	<h4>Page body {{ body.client }}</h4>
+
+	<h2>Category Add:</h2>
+	<form action="/user_add" method="post">
+		<label for="user_category_add">Category add</label>
+		<input type="text" id="user_category_add" name="user_category_add">
+		<input type="submit" value="Submit">
+	</form>
+
+	<h2>User Add:</h2>
+	<form action="/user_add" method="post">
+		<label for="user_category">User category:</label>
+			<select name="user_category">
+				{% for category in body.user_category %}
+						<option label="{{ category }}" value="{{ category }}">{{ category }}</option>
+				{% endfor %}
+			</select>
+		<br><br>
+	  <input type="hidden" id="user_type" name="user_type" value="standart_user">
+
+	  <label for="user_login">User login:</label>
+	  <input type="text" id="user_login" name="user_login"><br><br>
+
+	  <label for="user_password">User password:</label>
+	  <input type="text" id="user_password" name="user_password"><br><br>
+
+	  <label for="user_level">User level:</label>
+	  <input type="text" id="user_level" name="user_level"><br><br>
+
+	  <input type="submit" value="Submit">
+	</form>
+
+	<br><br>
+	<h3>Users:</h3>
+
+	<form action="/user_add" method="post">
+		<ul>
+			{% if body.users %}
+				{% for item in body.users %}
+					<li>
+						User login: {{ item.user_login }},
+						User category: {{ item.user_category.name }},
+						User password: {{ item.user_password }},
+						User level: {{ item.user_level }},
+						User id: {{ item.id }}
+						<label for="user_course_id">Add course:</label>
+						<select name="user_course_id">
+							{% for course in body.courses %}
+									<option label="{{ course.course_type }}" value="{{ course.id }}">{{ course.course_type }}</option>
+							{% endfor %}
+						</select>
+						<input type="hidden" id="user_id" name="user_id" value="{{ item.id }}">
+						<input type="submit" value="Set course">
+					</li>
+
+					<h3>User courses:</h3>
+					{% for course in body.courses %}
+						{% for user in course.users %}
+							{% if user.id == item.id %}
+								{{- course.course_type -}},
+							{% endif %}
+						{% endfor %}
+					{% endfor %}
+					<br><br>
+				{% endfor %}
+			{% endif %}
+		</ul>
+	</form>
+{% endblock %}
+

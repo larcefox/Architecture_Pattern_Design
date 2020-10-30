@@ -10,6 +10,7 @@ class Java(Course):
         self.id = Course.auto_id
         Course.auto_id += 1
         self.course_type = 'java'
+        self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
@@ -31,6 +32,7 @@ class JavaScript(Course):
         self.id = Course.auto_id
         Course.auto_id += 1
         self.course_type = 'javascript'
+        self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
@@ -52,6 +54,7 @@ class Python(Course):
         self.id = Course.auto_id
         Course.auto_id += 1
         self.course_type = 'python'
+        self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
@@ -73,6 +76,7 @@ class Generic(Course):
         self.id = Course.auto_id
         Course.auto_id += 1
         self.course_type = 'generic'
+        self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
@@ -94,11 +98,15 @@ class Generic(Course):
 '''
 
 class StandartUser(User):
-    def __init__(self, user_login, user_password, user_level):
+    def __init__(self, user_login, user_password, user_level, user_category):
+        self.id = User.auto_id
+        User.auto_id += 1
         self.user_type = 'standart_user'
         self.user_login = user_login
         self.user_password = user_password
         self.user_level = user_level
+        self.user_category = user_category
+        self.user_category_add()
     def user_type(self):
         return self.user_type
     def user_password(self):
@@ -107,6 +115,8 @@ class StandartUser(User):
         return self.user_login
     def user_level(self):
         return self.user_level
+    def user_category_add(self):
+        self.user_category.users.append(self)
 
 '''
 --------------------------CATEGORY--------------------------
@@ -140,31 +150,34 @@ class CategoryLogger():
             return __class__.categorys[name]
 
 '''
---------------------------FLASK_URL_DECORATOR--------------------------
+--------------------------USER_CATEGORY--------------------------
 '''
 
-class UrlDecoratorStage2(object):
-    def __init__(self, func, url):
-        self.func = func
-        self.url = url
-    def __call__(self, *args, **kw):
-        # code to run prior to function call
-        try:
-            result = self.func(*args, **kw)
-            # code to run after function call
-            return result
-        except Exception as e:
-            self.urls[self.url] = self.func
-            print('Url added: ', self.url)
-    def get_urls(self):
-        return self.urls
+class UserCategory(object):
 
-class UrlDecoratorStage1(object):
+    auto_id = 0
 
-    def __init__(self, url):
-        self.url = url
-        self.mode = "decorating"
+    def __init__(self, name, category):
+        self.id = UserCategory.auto_id
+        UserCategory.auto_id += 1
+        self.name = name
+        self.category = category
+        self.users = []
+    def user_count(self):
+        result = len(self.courses)
+        if self.category:
+            result += self.category.user_count()
+        return result
 
-    def __call__(self, func):
-        return UrlDecoratorStage2(func, self.url)
+class UserCategoryLogger():
+    categorys = {
+            'teacher': UserCategory('standart_teacher', None),
+            'student': UserCategory('standart_student', None),
+        }
+    def __call__(self, name: str, category=None) -> object:
+        if name in __class__.categorys:
+            return __class__.categorys[name]
+        else:
+            __class__.categorys[name] = UserCategory(name, None)
+            return __class__.categorys[name]
 

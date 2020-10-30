@@ -4,7 +4,6 @@ import os
 import configparser
 from domains.course import Course
 from domains.user import User
-from models import UrlDecoratorStage1
 from core.engine import Application
 
 # Загрузка файла конфигурации сервера
@@ -41,31 +40,36 @@ class Data_Storage:
             if course.id == id:
                 return course
 
+    def get_user_by_id(self, id):
+        for user in self.get_users():
+            if user.id == id:
+                return user
+
 
 data_storage = Data_Storage()
 
 
-def main_view(request, template_render, models) -> Response:
+def main_view(request, template_render, models_list) -> Response:
     body['client'] = request.data.get('client', None)
     # if page title equal dict key template will be applied
     title = 'index'
     body['data'] = request.data.get('GET_DATA', None)
     return Response(ANSWER_CODES['200'], template_render(title, body))
 
-def about_view(request, template_render, models) -> Response:
+def about_view(request, template_render, models_list) -> Response:
     body['client'] = request.data.get('client', None)
     # if page title equal dict key template will be applied
     title = 'about'
     return Response(ANSWER_CODES['200'], template_render(title, body))
 
-def contacts_view(request, template_render, models) -> Response:
+def contacts_view(request, template_render, models_list) -> Response:
     body['client'] = request.data.get('client', None)
     # if page title equal dict key template will be applied
     title = 'contacts'
     print(request.data.get('POST_DATA', None))
     return Response(ANSWER_CODES['200'], template_render(title, body))
 
-def not_found_view(request, template_render, models) -> Response:
+def not_found_view(request, template_render, models_list) -> Response:
     body['client'] = request.data.get('client', None)
     # if page title equal dict key template will be applied
     title = '404'
@@ -93,19 +97,46 @@ def admin_view(request, template_render, models_list) -> Response:
             data_storage.save_course(course)
 
         elif 'course_clone_id' in post_data:
-
+            #Course clone error. Same hidden fild names, clone last element in list <li>.
             original_course_id = int(post_data['course_clone_id'])
+            print('original_course_id ', original_course_id)
+            for course in data_storage.get_courses():
+                print(course.id)
             original_course = data_storage.get_course_by_id(original_course_id)
             clone_course = original_course.clone(original_course)
+            print('original ', original_course, 'copy ', clone_course)
             data_storage.save_course(clone_course)
 
         body['courses'] = data_storage.get_courses()
 
     return Response(ANSWER_CODES['200'], template_render(title, body))
 
-#@application.add_route('/bingo/')
-def bingo_view(request, template_render, models) -> Response:
+
+def user_add_view(request, template_render, models_list) -> Response:
     body['client'] = request.data.get('client', None)
     # if page title equal dict key template will be applied
-    title = 'ABOUT'
+    title = 'user_add'
+    post_data = request.data.get('POST_DATA', None)
+    get_data = request.data.get('GET_DATA', None)
+    body['user_category'] = models_list['user_categorys']
+    if post_data:
+
+        if 'user_category_add' in post_data:
+            models_list['select_user_category'](name=post_data['user_category_add'])
+
+        elif 'user_login' in post_data:
+            # Replace category name by object
+            post_data['user_category'] = models_list['select_user_category'](post_data['user_category'])
+            # Create course
+            user = User.create(models_list['user_types'], **post_data)
+            data_storage.save_user(user)
+
+        elif 'user_course_id' in post_data:
+            print(f'user_course_id: { post_data["user_course_id"] }, get_course_by_id: { data_storage.get_course_by_id(int(post_data["user_course_id"])) }')
+            course = data_storage.get_course_by_id(int(post_data['user_course_id']))
+            print(f'user_id: { post_data["user_id"] }, get_user_by_id: { data_storage.get_user_by_id(int(post_data["user_id"])) }')
+            user = data_storage.get_user_by_id(int(post_data['user_id']))
+            course.users.append(user)
+        body['users'] = data_storage.get_users()
+
     return Response(ANSWER_CODES['200'], template_render(title, body))

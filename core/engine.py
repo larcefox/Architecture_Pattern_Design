@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from core.templates import TemplateRender
-from reusepatterns.singletones import Singleton
+
 
 class Request:
     def __init__(self, data=None):
