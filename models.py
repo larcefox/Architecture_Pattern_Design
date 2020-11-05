@@ -1,126 +1,192 @@
 from domains.course import Course
+from domains.observer import Observer, Subject
 from domains.user import User
 
-'''
+"""
 --------------------------COURCES--------------------------
-'''
+"""
 
-class Java(Course):
-    def __init__(self, course_specialization, course_duration, course_level, course_category):
+
+class Java(Course, Subject):
+    def __init__(
+        self, course_specialization, course_duration, course_level, course_category
+    ):
+        super().__init__()
         self.id = Course.auto_id
         Course.auto_id += 1
-        self.course_type = 'java'
+        self.course_type = "java"
         self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
         self.course_category = course_category
         self.course_category_add()
+        _ = (self.attach(obs) for obs in Observer.observers)
+        self._subject_state = self.users
+
     def course_duration(self):
         return self.course_duration
+
     def course_level(self):
         return self.course_level
-    def course_specialization(self, course_specialization):
+
+    def course_specialization(self):
         return self.course_specialization
+
     def course_type(self):
         return self.course_type
+
     def course_category_add(self):
         self.course_category.courses.append(self)
 
-class JavaScript(Course):
-    def __init__(self, course_specialization, course_duration, course_level, course_category):
+    def course_category_del(self):
+        self.course_category.courses.remove(self)
+
+
+class JavaScript(Course, Subject):
+    def __init__(
+        self, course_specialization, course_duration, course_level, course_category
+    ):
+        super().__init__()
         self.id = Course.auto_id
         Course.auto_id += 1
-        self.course_type = 'javascript'
+        self.course_type = "javascript"
         self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
         self.course_category = course_category
         self.course_category_add()
+        _ = (self.attach(obs) for obs in Observer.observers)
+        self._subject_state = self.users
+
     def course_duration(self):
         return self.course_duration
+
     def course_level(self):
         return self.course_level
-    def course_specialization(self, course_specialization):
+
+    def course_specialization(self):
         return self.course_specialization
+
     def course_type(self):
         return self.course_type
+
     def course_category_add(self):
         self.course_category.courses.append(self)
 
-class Python(Course):
-    def __init__(self, course_specialization, course_duration, course_level, course_category):
+    def course_category_del(self):
+        self.course_category.courses.remove(self)
+
+
+class Python(Course, Subject):
+    def __init__(
+        self, course_specialization, course_duration, course_level, course_category
+    ):
+        super().__init__()
         self.id = Course.auto_id
         Course.auto_id += 1
-        self.course_type = 'python'
+        self.course_type = "python"
         self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
         self.course_category = course_category
         self.course_category_add()
+        _ = (self.attach(obs) for obs in Observer.observers)
+        self._subject_state = self.users
+
     def course_duration(self):
         return self.course_duration
+
     def course_level(self):
         return self.course_level
-    def course_specialization(self, course_specialization):
+
+    def course_specialization(self):
         return self.course_specialization
+
     def course_type(self):
         return self.course_type
+
     def course_category_add(self):
         self.course_category.courses.append(self)
 
-class Generic(Course):
-    def __init__(self, course_specialization, course_duration, course_level, course_category):
+    def course_category_del(self):
+        self.course_category.courses.remove(self)
+
+
+class Generic(Course, Subject):
+    def __init__(
+        self, course_specialization, course_duration, course_level, course_category
+    ):
+        super().__init__()
         self.id = Course.auto_id
         Course.auto_id += 1
-        self.course_type = 'generic'
+        self.course_type = "generic"
         self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
         self.course_level = course_level
         self.course_category = course_category
         self.course_category_add()
+        _ = (self.attach(obs) for obs in Observer.observers)
+        self._subject_state = self.users
+
     def course_duration(self):
         return self.course_duration
+
     def course_level(self):
         return self.course_level
-    def course_specialization(self, course_specialization):
+
+    def course_specialization(self):
         return self.course_specialization
+
     def course_type(self):
         return self.course_type
+
     def course_category_add(self):
         self.course_category.courses.append(self)
 
-'''
+    def course_category_del(self):
+        self.course_category.courses.remove(self)
+
+
+"""
 --------------------------USERS--------------------------
-'''
+"""
+
 
 class StandartUser(User):
     def __init__(self, user_login, user_password, user_level, user_category):
         self.id = User.auto_id
         User.auto_id += 1
-        self.user_type = 'standart_user'
+        self.user_type = "standart_user"
         self.user_login = user_login
         self.user_password = user_password
         self.user_level = user_level
         self.user_category = user_category
         self.user_category_add()
+
     def user_type(self):
         return self.user_type
+
     def user_password(self):
         return self.user_password
+
     def user_login(self):
         return self.user_login
+
     def user_level(self):
         return self.user_level
+
     def user_category_add(self):
         self.user_category.users.append(self)
 
-'''
+
+"""
 --------------------------CATEGORY--------------------------
-'''
+"""
+
 
 class Category(object):
 
@@ -132,16 +198,19 @@ class Category(object):
         self.name = name
         self.category = category
         self.courses = []
+
     def course_count(self):
         result = len(self.courses)
         if self.category:
             result += self.category.course_count()
         return result
 
-class CategoryLogger():
+
+class CategoryLogger:
     categorys = {
-            'standart_category': Category('standart_category', None),
-        }
+        "standart_category": Category("standart_category", None),
+    }
+
     def __call__(self, name: str, category=None) -> object:
         if name in __class__.categorys:
             return __class__.categorys[name]
@@ -149,9 +218,11 @@ class CategoryLogger():
             __class__.categorys[name] = Category(name, None)
             return __class__.categorys[name]
 
-'''
+
+"""
 --------------------------USER_CATEGORY--------------------------
-'''
+"""
+
 
 class UserCategory(object):
 
@@ -163,17 +234,20 @@ class UserCategory(object):
         self.name = name
         self.category = category
         self.users = []
+
     def user_count(self):
         result = len(self.courses)
         if self.category:
             result += self.category.user_count()
         return result
 
-class UserCategoryLogger():
+
+class UserCategoryLogger:
     categorys = {
-            'teacher': UserCategory('standart_teacher', None),
-            'student': UserCategory('standart_student', None),
-        }
+        "teacher": UserCategory("standart_teacher", None),
+        "student": UserCategory("standart_student", None),
+    }
+
     def __call__(self, name: str, category=None) -> object:
         if name in __class__.categorys:
             return __class__.categorys[name]
@@ -181,3 +255,16 @@ class UserCategoryLogger():
             __class__.categorys[name] = UserCategory(name, None)
             return __class__.categorys[name]
 
+
+"""
+--------------------------OBSEVER--------------------------
+"""
+
+
+class SMS(Observer):
+    def __init__():
+        super().__init__()
+
+    def update(self, users: list):
+        for user in users:
+            print(f"SMS to {user}")
