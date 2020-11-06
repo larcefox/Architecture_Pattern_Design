@@ -5,7 +5,7 @@ import os
 
 from domains.course import Course
 from domains.user import User
-
+from models import DataMapper
 # Загрузка файла конфигурации сервера
 config = configparser.ConfigParser()
 conf_path = os.path.join(
@@ -14,7 +14,7 @@ conf_path = os.path.join(
 config.read(conf_path)
 ANSWER_CODES = config["ANSWER_CODES"]
 body = {}
-
+data_mapper = DataMapper()
 
 class Response(object):
     def __init__(self, code, text):
@@ -90,7 +90,7 @@ def admin_view(request, template_render, models_list) -> Response:
 
     post_data = request.data.get("POST_DATA", None)
     get_data = request.data.get("GET_DATA", None)
-    # body["course_list"] = models_list["course_types"]
+    body["course_list"] = models_list["course_types"]
     body["course_category"] = models_list['categorys']
     if post_data:
 

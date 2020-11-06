@@ -112,6 +112,7 @@ models_list = {
     "categorys": category.__class__.categorys,
     "select_user_category": user_category,
     "user_categorys": user_category.__class__.categorys,
+
 }
 
 application = Application(urls, middlewares, models_list)

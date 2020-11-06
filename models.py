@@ -1,3 +1,4 @@
+import sqlite3
 from domains.course import Course
 from domains.observer import Observer, Subject
 from domains.user import User
@@ -8,6 +9,7 @@ from domains.user import User
 
 
 class Java(Course, Subject):
+    course_list = []
     def __init__(
         self, course_specialization, course_duration, course_level, course_category
     ):
@@ -23,6 +25,7 @@ class Java(Course, Subject):
         self.course_category_add()
         _ = (self.attach(obs) for obs in Observer.observers)
         self._subject_state = self.users
+        __class__.course_list.append(self)
 
     def course_duration(self):
         return self.course_duration
@@ -44,6 +47,7 @@ class Java(Course, Subject):
 
 
 class JavaScript(Course, Subject):
+    course_list = []
     def __init__(
         self, course_specialization, course_duration, course_level, course_category
     ):
@@ -59,6 +63,7 @@ class JavaScript(Course, Subject):
         self.course_category_add()
         _ = (self.attach(obs) for obs in Observer.observers)
         self._subject_state = self.users
+        __class__.course_list.append(self)
 
     def course_duration(self):
         return self.course_duration
@@ -80,6 +85,7 @@ class JavaScript(Course, Subject):
 
 
 class Python(Course, Subject):
+    course_list = []
     def __init__(
         self, course_specialization, course_duration, course_level, course_category
     ):
@@ -95,6 +101,7 @@ class Python(Course, Subject):
         self.course_category_add()
         _ = (self.attach(obs) for obs in Observer.observers)
         self._subject_state = self.users
+        __class__.course_list.append(self)
 
     def course_duration(self):
         return self.course_duration
@@ -116,6 +123,7 @@ class Python(Course, Subject):
 
 
 class Generic(Course, Subject):
+    course_list = []
     def __init__(
         self, course_specialization, course_duration, course_level, course_category
     ):
@@ -131,6 +139,7 @@ class Generic(Course, Subject):
         self.course_category_add()
         _ = (self.attach(obs) for obs in Observer.observers)
         self._subject_state = self.users
+        __class__.course_list.append(self)
 
     def course_duration(self):
         return self.course_duration
@@ -268,3 +277,44 @@ class SMS(Observer):
     def update(self, users: list):
         for user in users:
             print(f"SMS to {user}")
+
+"""
+--------------------------DATA_MAPPER--------------------------
+"""
+
+class DataMapper:
+    def __init__(self):
+        # self.obj = obj
+        self.conn = sqlite3.connect("mydatabase.db") # или :memory: чтобы сохранить в RAM
+        self.cursor = self.conn.cursor()
+
+    def obj_to_db(self, obj):
+        # Create table
+
+        columns = obj.__dict__.keys()
+        values = [str(itm) for itm in obj.__dict__.values()]
+        object_id = str(obj).split(" ")[-1][:-1]
+        columns = 'name, ' + ', '.join(columns)
+        values = f'{object_id}, ' + ', '.join(values)
+        class_name = obj.__class__.__name__
+
+        self.cursor.execute(f'''CREATE TABLE IF NOT EXISTS
+                            { class_name }({ columns })
+                                ''')
+        self.cursor.execute(f'''INSERT INTO { class_name }({ columns }) VALUES ({ values })''')
+
+    def db_to_obj(self, course_types: dict):
+        self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = self.cursor.fetchall()
+        for table in tables:
+            pass
+
+
+    def show(self):
+        self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = self.cursor.fetchall()
+        for table in tables:
+            print(table[0])
+            table = (table[0])
+            self.cursor.execute(f'SELECT * FROM {table}')
+            print(self.cursor.fetchall())
