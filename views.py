@@ -3,7 +3,6 @@
 import configparser
 import os
 
-from core.engine import Application
 from domains.course import Course
 from domains.user import User
 
@@ -91,8 +90,8 @@ def admin_view(request, template_render, models_list) -> Response:
 
     post_data = request.data.get("POST_DATA", None)
     get_data = request.data.get("GET_DATA", None)
-    body["course_list"] = models_list["course_types"]
-    body["course_category"] = models_list["categorys"]
+    # body["course_list"] = models_list["course_types"]
+    body["course_category"] = models_list['categorys']
     if post_data:
 
         if "course_category_add" in post_data:
@@ -129,7 +128,7 @@ def user_add_view(request, template_render, models_list) -> Response:
     title = "user_add"
     post_data = request.data.get("POST_DATA", None)
     get_data = request.data.get("GET_DATA", None)
-    body["user_category"] = models_list["user_categorys"]
+    # body["user_category"] = models_list["user_categorys"]
     if post_data:
 
         if "user_category_add" in post_data:
