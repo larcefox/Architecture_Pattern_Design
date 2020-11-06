@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block main %}
+	<h1>Jinja 2 Template</h1>
+	{% set active_page = 'contacts' %}
+	{% include 'include/menu.html' %}
+	<h3>Page title {{ title }}</h3>
+	<h4>Page body {{ body.client }}</h4>
+
+	<h3>Courses:</h3>
+	<form action="/course_edit" method="post">
+		<ul>
+			{% if body.courses %}
+				{% for item in body.courses %}
+					<li>
+						Course id: {{ item.id }}<br><br>
+						<input type="hidden" id="item.id" name="cource_id" value="{{ item.id }}">
+						Course type: {{ item.course_type }},<br><br>
+
+						Old course category: {{ item.course_category.name }},
+						<label for="course_category">Course category:</label>
+						<select name="course_category" selected="{{ item.course_category.name }}">
+							{% for category in body.course_category %}
+								<option label="{{ category }}" value="{{ category }}">{{ category }}</option>
+							{% endfor %}
+						</select><br><br>
+
+						Old course Specialization: {{ item.course_specialization|replace('+', ' ') }},
+						<label for="course_specialization">Course specialization:</label>
+						<input type="text" id="course_specialization" name="course_specialization" value="{{ item.course_specialization|replace('+', ' ') }}"><br><br>
+
+						Old course duration: {{ item.course_duration }},
+						<label for="course_duration">Course duration:</label>
+						<input type="text" id="course_duration" name="course_duration" value="{{ item.course_duration }}"><br><br>
+
+						Old level: {{ item.course_level }}
+						<label for="course_level">Course level:</label>
+						<input type="text" id="course_level" name="course_level" value="{{ item.course_level }}"><br><br>
+
+
+						<input type="submit" value="Edit course">
+					</li>
+				{% endfor %}
+			{% endif %}
+		</ul>
+	</form>
+	<form action="/course_edit" method="post">
+		<input type="submit" id="repair_from_db" name="repair_from_db" value="Repair courses from db"><br><br>
+	</form>
+{% endblock %}
+
