@@ -89,10 +89,10 @@ middlewares = [
 
 # Course types dict
 course_types = {
-    "generic": models.Generic,
-    "java": models.Java,
-    "javascript": models.JavaScript,
-    "python": models.Python,
+    "Generic": models.Generic,
+    "Java": models.Java,
+    "JavaScript": models.JavaScript,
+    "Python": models.Python,
 }
 
 # User types dict
@@ -112,7 +112,8 @@ models_list = {
     "categorys": category.__class__.categorys,
     "select_user_category": user_category,
     "user_categorys": user_category.__class__.categorys,
-
+    "db": models.DataMapper,
+    "ds": models.DataStorage,
 }
 
 application = Application(urls, middlewares, models_list)

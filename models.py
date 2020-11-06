@@ -2,6 +2,7 @@ import sqlite3
 from domains.course import Course
 from domains.observer import Observer, Subject
 from domains.user import User
+from reusepatterns.singletones import Singleton
 
 """
 --------------------------COURCES--------------------------
@@ -16,7 +17,7 @@ class Java(Course, Subject):
         super().__init__()
         self.id = Course.auto_id
         Course.auto_id += 1
-        self.course_type = "java"
+        self.course_type = "Java"
         self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
@@ -54,7 +55,7 @@ class JavaScript(Course, Subject):
         super().__init__()
         self.id = Course.auto_id
         Course.auto_id += 1
-        self.course_type = "javascript"
+        self.course_type = "JavaScript"
         self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
@@ -92,7 +93,7 @@ class Python(Course, Subject):
         super().__init__()
         self.id = Course.auto_id
         Course.auto_id += 1
-        self.course_type = "python"
+        self.course_type = "Python"
         self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
@@ -130,7 +131,7 @@ class Generic(Course, Subject):
         super().__init__()
         self.id = Course.auto_id
         Course.auto_id += 1
-        self.course_type = "generic"
+        self.course_type = "Generic"
         self.users = []
         self.course_specialization = course_specialization
         self.course_duration = course_duration
@@ -282,7 +283,7 @@ class SMS(Observer):
 --------------------------DATA_MAPPER--------------------------
 """
 
-class DataMapper:
+class DataMapper(metaclass=Singleton):
     def __init__(self):
         # self.obj = obj
         self.conn = sqlite3.connect("mydatabase.db") # или :memory: чтобы сохранить в RAM
@@ -293,22 +294,38 @@ class DataMapper:
 
         columns = obj.__dict__.keys()
         values = [str(itm) for itm in obj.__dict__.values()]
-        object_id = str(obj).split(" ")[-1][:-1]
+        object_id = str(obj)
         columns = 'name, ' + ', '.join(columns)
-        values = f'{object_id}, ' + ', '.join(values)
+        values = f'"{object_id}", "' + '", "'.join(values) + '"'
         class_name = obj.__class__.__name__
 
         self.cursor.execute(f'''CREATE TABLE IF NOT EXISTS
                             { class_name }({ columns })
                                 ''')
         self.cursor.execute(f'''INSERT INTO { class_name }({ columns }) VALUES ({ values })''')
+        self.conn.commit()
 
-    def db_to_obj(self, course_types: dict):
+    def repair_from_db(self, model_list: dict):
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
         tables = self.cursor.fetchall()
+        data_storage = model_list["ds"]()
         for table in tables:
-            pass
-
+            table = (table[0])
+            for course_class in model_list['course_types'].values():
+                if table == course_class.__name__:
+                    self.cursor.execute(f'SELECT name FROM {table}')
+                    db_courses = self.cursor.fetchall()
+                    for db_course in db_courses:
+                        if db_course[0] in (str(course) for course in course_class.course_list):
+                            print('in', db_course[0])
+                        elif db_course[0] not in (str(course) for course in course_class.course_list):
+                            print('not in', db_course[0])
+                            self.cursor.execute(f'SELECT course_specialization, course_duration, course_level FROM {table} where name="{db_course[0]}"')
+                            data = self.cursor.fetchall()[0]
+                            print('data', data)
+                            course = Course.create(model_list['course_types'], course_class.__name__, *data, model_list["select_category"]('repair'))
+                            data_storage.save_course(course)
+                            self.cursor.execute(f'DELETE FROM {table} WHERE name="{db_course[0]}"')
 
     def show(self):
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
@@ -318,3 +335,36 @@ class DataMapper:
             table = (table[0])
             self.cursor.execute(f'SELECT * FROM {table}')
             print(self.cursor.fetchall())
+
+
+"""
+--------------------------DATA_STORAGE--------------------------
+"""
+
+
+class DataStorage(metaclass=Singleton):
+    def __init__(self):
+        self.courses = []
+        self.users = []
+
+    def save_course(self, course):
+        self.courses.append(course)
+
+    def save_user(self, user):
+        self.users.append(user)
+
+    def get_courses(self):
+        return self.courses or []
+
+    def get_users(self):
+        return self.users or []
+
+    def get_course_by_id(self, id):
+        for course in self.get_courses():
+            if course.id == id:
+                return course
+
+    def get_user_by_id(self, id):
+        for user in self.get_users():
+            if user.id == id:
+                return user

@@ -5,7 +5,8 @@ import os
 
 from domains.course import Course
 from domains.user import User
-from models import DataMapper
+from models import DataStorage
+
 # Загрузка файла конфигурации сервера
 config = configparser.ConfigParser()
 conf_path = os.path.join(
@@ -14,43 +15,13 @@ conf_path = os.path.join(
 config.read(conf_path)
 ANSWER_CODES = config["ANSWER_CODES"]
 body = {}
-data_mapper = DataMapper()
 
 class Response(object):
     def __init__(self, code, text):
         self.code = code
         self.text = text
 
-
-class Data_Storage:
-    def __init__(self):
-        self.courses = []
-        self.users = []
-
-    def save_course(self, course):
-        self.courses.append(course)
-
-    def save_user(self, user):
-        self.users.append(user)
-
-    def get_courses(self):
-        return self.courses or []
-
-    def get_users(self):
-        return self.users or []
-
-    def get_course_by_id(self, id):
-        for course in self.get_courses():
-            if course.id == id:
-                return course
-
-    def get_user_by_id(self, id):
-        for user in self.get_users():
-            if user.id == id:
-                return user
-
-
-data_storage = Data_Storage()
+data_storage = DataStorage()
 
 
 def main_view(request, template_render, models_list) -> Response:
@@ -92,6 +63,8 @@ def admin_view(request, template_render, models_list) -> Response:
     get_data = request.data.get("GET_DATA", None)
     body["course_list"] = models_list["course_types"]
     body["course_category"] = models_list['categorys']
+    db = models_list['db']()
+
     if post_data:
 
         if "course_category_add" in post_data:
@@ -105,6 +78,7 @@ def admin_view(request, template_render, models_list) -> Response:
             # Create course
             course = Course.create(models_list["course_types"], **post_data)
             data_storage.save_course(course)
+            db.obj_to_db(course)
 
         elif "course_clone_id" in post_data:
             # Course clone error. Same hidden fild names, clone last element in list <li>.
@@ -128,7 +102,7 @@ def user_add_view(request, template_render, models_list) -> Response:
     title = "user_add"
     post_data = request.data.get("POST_DATA", None)
     get_data = request.data.get("GET_DATA", None)
-    # body["user_category"] = models_list["user_categorys"]
+    body["user_category"] = models_list["user_categorys"]
     if post_data:
 
         if "user_category_add" in post_data:
@@ -169,13 +143,14 @@ def course_edit_view(request, template_render, models_list) -> Response:
 
             edit_course = data_storage.get_course_by_id(int(post_data["cource_id"]))
 
-            if (
-                edit_course.course_specialization != post_data["course_specialization"]
-                or edit_course.course_duration != post_data["course_duration"]
-                or edit_course.course_level != post_data["course_level"]
-            ):
+            print(edit_course)
+            if edit_course.course_specialization != post_data["course_specialization"]:
                 edit_course.course_specialization = post_data["course_specialization"]
+
+            if edit_course.course_duration != post_data["course_duration"]:
                 edit_course.course_duration = post_data["course_duration"]
+
+            if edit_course.course_level != post_data["course_level"]:
                 edit_course.course_level = post_data["course_level"]
 
             if edit_course.course_category != post_data["course_category"]:
@@ -185,6 +160,9 @@ def course_edit_view(request, template_render, models_list) -> Response:
                 )
                 edit_course.course_category = edit_course_category
                 edit_course.course_category_add()
-                edit_course._notify()
 
+        elif "repair_from_db" in post_data:
+            db = models_list['db']()
+            db.repair_from_db(models_list)
+        body["courses"] = data_storage.get_courses()
     return Response(ANSWER_CODES["404"], template_render(title, body))
